@@ -1,0 +1,12 @@
+Babelfish
+Copyright 2026 TimeKettle
+
+This repository (code) and the Babelfish-30B-A3B model weights, including the FP8 and GGUF versions, are licensed
+under the Apache License, Version 2.0 (see LICENSE).
+
+The model weights are a fine-tuned derivative of Qwen3-Omni-30B-A3B-Instruct (Qwen team, Alibaba Cloud), licensed
+under the Apache License, Version 2.0: https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Instruct
+Modifications: fine-tuned for streaming simultaneous speech-to-text translation; the speech-generation part of the
+original model is not included.
+
+The GGUF files are produced with and run on llama.cpp (MIT License): https://github.com/ggml-org/llama.cpp

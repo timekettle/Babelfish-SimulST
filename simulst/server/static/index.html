@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Babelfish</title>
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Babelfish</h1>
+      <span class="sub" data-i18n="subtitle">英中双向同声传译</span>
+    </div>
+    <button id="lang" class="ghost" type="button">EN</button>
+  </header>
+
+  <main>
+    <section class="controls">
+      <label class="field">
+        <span data-i18n="direction">方向</span>
+        <select id="direction">
+          <option value="en2zh" data-i18n="en2zh">英文 → 中文</option>
+          <option value="zh2en" data-i18n="zh2en">中文 → 英文</option>
+        </select>
+      </label>
+      <div class="group">
+        <button id="mic" class="primary" type="button" data-i18n="micStart">开始麦克风</button>
+        <button id="stop" type="button" disabled data-i18n="stop">结束并收尾</button>
+      </div>
+      <div class="group file">
+        <input id="file" type="file" accept="audio/*,video/*">
+        <label class="check"><input id="realtime" type="checkbox" checked> <span data-i18n="realtime">按实时速度播放</span></label>
+        <button id="upload" type="button" data-i18n="upload">翻译文件</button>
+      </div>
+    </section>
+
+    <section class="output">
+      <div class="bar">
+        <span id="status" class="status" data-i18n="idle">就绪</span>
+        <span class="spacer"></span>
+        <button id="copy" class="ghost" type="button" data-i18n="copy">复制</button>
+        <button id="clear" class="ghost" type="button" data-i18n="clear">清空</button>
+      </div>
+      <div id="text" class="text" aria-live="polite"></div>
+      <div id="stats" class="stats"></div>
+    </section>
+    <p class="hint" data-i18n="hint">远程访问时浏览器只允许在 HTTPS 或 localhost 下使用麦克风；可用 SSH 端口转发后打开 http://127.0.0.1:端口/。</p>
+  </main>
+  <script src="static/app.js"></script>
+</body>
+</html>

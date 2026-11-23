@@ -1,0 +1,102 @@
+diff --git a/tools/mtmd/clip-impl.h b/tools/mtmd/clip-impl.h
+index 0504e8f..1a4aa68 100644
+--- a/tools/mtmd/clip-impl.h
++++ b/tools/mtmd/clip-impl.h
+@@ -779,6 +779,8 @@ static inline const std::vector<int> & clip_suffix_rows(clip_suffix_type type) {
+ //     Memory layout: RGBRGB...RGBRGB... (nt times)
+ // For audio, only one channel is used, buf.size() == nx*ny
+ //     nx will be n_frames and ny will be n_mel
++int clip_qwen3a_valid_tokens(int n_frames);
++
+ struct clip_image_f32 {
+     // marks the global view in e.g., DeepSeek-OCR Models
+     bool add_viewsep = false;
+@@ -788,6 +790,8 @@ struct clip_image_f32 {
+     // deepseek4v: number of leading IMAGE_PAD embeddings, aligns IMAGE_START to the LLM compressor ratio
+     // depends on the chunk position, set at tokenize time (see mtmd_tokenizer::add_media)
+     int32_t lead_pad = 0;
++    // audio: number of valid (non-padding) mel frames, 0 = all
++    int32_t n_valid = 0;
+     // separators appended after the image tokens
+     clip_suffix_type suffix_type = CLIP_SUFFIX_NONE;
+ 
+diff --git a/tools/mtmd/clip.cpp b/tools/mtmd/clip.cpp
+index d723432..18f3b5e 100644
+--- a/tools/mtmd/clip.cpp
++++ b/tools/mtmd/clip.cpp
+@@ -4724,6 +4724,20 @@ int clip_n_output_tokens_y(const clip_ctx * ctx, const clip_image_f32 * img) {
+     return 1;
+ }
+ 
++// Qwen3-Omni / Qwen3-ASR audio encoder: tokens produced by n mel frames (100-frame chunks, 13 tokens per full
++// chunk; a partial last chunk gives fewer tokens, padding positions are dropped as in the reference)
++int clip_qwen3a_valid_tokens(int n_frames) {
++    const int full = n_frames / 100;
++    const int rem  = n_frames % 100;
++    int out = full * 13;
++    if (rem > 0) {
++        const int f1 = (rem - 1) / 2 + 1;
++        const int f2 = (f1 - 1) / 2 + 1;
++        out += (f2 - 1) / 2 + 1;
++    }
++    return out;
++}
++
+ int clip_n_output_tokens(const clip_ctx * ctx, const clip_image_f32 * img) {
+     const auto & params = ctx->model.hparams;
+ 
+@@ -4923,6 +4937,9 @@ int clip_n_output_tokens(const clip_ctx * ctx, const clip_image_f32 * img) {
+                 const int chunk_size       = 100;
+                 const int tokens_per_chunk = 13;
+                 n_patches = (img->nx() / chunk_size) * tokens_per_chunk;
++                if (img->n_valid > 0 && img->n_valid < img->nx()) {
++                    n_patches = clip_qwen3a_valid_tokens(img->n_valid);
++                }
+             } break;
+         case PROJECTOR_TYPE_GLMA:
+             {
+diff --git a/tools/mtmd/models/qwen3a.cpp b/tools/mtmd/models/qwen3a.cpp
+index 4de9695..31661e3 100644
+--- a/tools/mtmd/models/qwen3a.cpp
++++ b/tools/mtmd/models/qwen3a.cpp
+@@ -69,7 +69,14 @@ ggml_cgraph * clip_graph_qwen3a::build() {
+         inp = ggml_add(ctx0, inp, ggml_repeat(ctx0, pos_tmp, tgt));
+     }
+ 
+-    ggml_tensor * cur = build_vit(inp, n_pos,
++    // keep only the valid tokens (padding of the partial last chunk is at the end)
++    int64_t n_keep = n_pos;
++    if (img.n_valid > 0 && img.n_valid < n_frames) {
++        n_keep = clip_qwen3a_valid_tokens(img.n_valid);
++        inp = ggml_view_2d(ctx0, inp, inp->ne[0], n_keep, inp->nb[1], 0);
++    }
++
++    ggml_tensor * cur = build_vit(inp, n_keep,
+         NORM_TYPE_NORMAL, hparams.ffn_op,
+         nullptr,  // pos embd already added above
+         nullptr);
+diff --git a/tools/mtmd/mtmd-audio.cpp b/tools/mtmd/mtmd-audio.cpp
+index 14b5a72..23f56af 100644
+--- a/tools/mtmd/mtmd-audio.cpp
++++ b/tools/mtmd/mtmd-audio.cpp
+@@ -719,7 +719,7 @@ bool mtmd_audio_preprocessor_qwen3a::preprocess(const float *                 sa
+     // The effective frame count: center-padded STFT gives ~n_samples/hop_length frames.
+     // We take min(mel_full.n_len, n_samples/hop + 1) to avoid including excess frames.
+     const int64_t n_eff = std::min(mel_full.n_len,
+-                               (int64_t)(n_samples / hparams.audio_hop_len) + 1);
++                               (int64_t)((n_samples + hparams.audio_hop_len - 1) / hparams.audio_hop_len));
+ 
+     // Split into inference windows matching n_window_infer=800 from model config.
+     // Each window is padded to the next multiple of chunk_size for the cgraph.
+diff --git a/tools/mtmd/mtmd.cpp b/tools/mtmd/mtmd.cpp
+index 410881b..57b796a 100644
+--- a/tools/mtmd/mtmd.cpp
++++ b/tools/mtmd/mtmd.cpp
+@@ -1838,6 +1838,7 @@ struct mtmd_tokenizer {
+                     {(int)mel_spec.n_len, (int)mel_spec.n_mel},
+                     is_placeholder, /* is_audio */ true);
+                 mel_f32.cpy_buf(mel_spec.data);
++                mel_f32.n_valid = (int32_t) mel_spec.n_len_org;
+ 
+                 size_t n_tokens = clip_n_output_tokens(ctx->ctx_a, &mel_f32);
+ 

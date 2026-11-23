@@ -1,0 +1,6 @@
+# Scoring (COMET, BLEU, latency; OmniSTEval for long-form re-segmentation)
+unbabel-comet==2.2.7
+omnisteval==0.1.10
+sacrebleu==2.5.1
+pyyaml
+soundfile

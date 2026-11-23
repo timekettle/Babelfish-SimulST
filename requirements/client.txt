@@ -1,0 +1,6 @@
+# simulst.client only (any machine, no GPU)
+numpy
+soundfile
+soxr
+websockets
+httpx

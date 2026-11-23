@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+.simulst/
+*.egg-info/
+build/
+dist/
+/llama.cpp/

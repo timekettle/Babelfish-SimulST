@@ -1,0 +1,12 @@
+# Model server environment (GPU). Tested: vLLM 0.28.0 (torch 2.13, CUDA 12.9 build) and a vLLM 0.23 nightly
+# (torch 2.11), both with transformers 5.13.1, on NVIDIA A800 80GB.
+vllm>=0.23
+transformers>=5.13
+numpy
+soundfile
+soxr
+fastapi
+uvicorn[standard]
+python-multipart
+websockets
+httpx

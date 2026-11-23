@@ -1,0 +1,2 @@
+{"id": "example_en_0001", "audio_path": "/path/to/english_16k.wav", "direction": "en2zh", "transcription": "optional source text", "translations": {"zh": "可选的参考译文"}}
+{"id": "example_zh_0001", "audio_path": "/path/to/chinese_16k.wav", "direction": "zh2en", "transcription": "可选的原文", "translations": {"en": "optional reference translation"}}
