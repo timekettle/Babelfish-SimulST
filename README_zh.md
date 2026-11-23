@@ -13,7 +13,7 @@
 
 </div>
 
-<!-- 演示视频：两个 mp4 在 assets/ 里。在 GitHub 网页上传后，把下面 2 处 assets/demo_*.mp4 换成上传得到的 https://github.com/user-attachments/assets/... 链接 -->
+<!-- 演示视频原文件备份在 assets/demo_en2zh.mp4 和 assets/demo_zh2en.mp4 -->
 <div align="center">
 <table>
   <tr>
@@ -21,8 +21,8 @@
     <td align="center"><b>中文 → 英文</b></td>
   </tr>
   <tr>
-    <td align="center"><video src="assets/demo_en2zh.mp4" width="380" controls></video></td>
-    <td align="center"><video src="assets/demo_zh2en.mp4" width="380" controls></video></td>
+    <td align="center"><video src="https://github.com/user-attachments/assets/7decba92-c857-48b8-98de-5a14d7283996" width="380" controls></video></td>
+    <td align="center"><video src="https://github.com/user-attachments/assets/55a6d8bf-3a24-42d9-b3f5-7a604713e2b3" width="380" controls></video></td>
   </tr>
 </table>
 <sub>演示中的译文由本仓库开源的 Babelfish-30B-A3B 实时生成（束宽 2）。<br>界面上的原文转写与译文语音由另接的语音识别和语音合成模型生成，不在本次开源范围内。</sub>

@@ -13,7 +13,7 @@
 
 </div>
 
-<!-- Demo videos: the two mp4 files are in assets/. After uploading them on the GitHub web page, replace the 2 occurrences of assets/demo_*.mp4 below with the https://github.com/user-attachments/assets/... links -->
+<!-- Demo video source backups are kept in assets/demo_en2zh.mp4 and assets/demo_zh2en.mp4 -->
 <div align="center">
 <table>
   <tr>
@@ -21,8 +21,8 @@
     <td align="center"><b>Chinese → English</b></td>
   </tr>
   <tr>
-    <td align="center"><video src="assets/demo_en2zh.mp4" width="380" controls></video></td>
-    <td align="center"><video src="assets/demo_zh2en.mp4" width="380" controls></video></td>
+    <td align="center"><video src="https://github.com/user-attachments/assets/7decba92-c857-48b8-98de-5a14d7283996" width="380" controls></video></td>
+    <td align="center"><video src="https://github.com/user-attachments/assets/55a6d8bf-3a24-42d9-b3f5-7a604713e2b3" width="380" controls></video></td>
   </tr>
 </table>
 <sub>The translations in the demos are generated in real time by the Babelfish-30B-A3B model released here (beam size 2).<br>The source transcript and translated speech in the UI come from separate ASR and TTS models not part of this release.</sub>
