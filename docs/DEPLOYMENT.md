@@ -62,18 +62,15 @@ pip install "vllm==0.28.0+cu129" "torch==2.13.0+cu129" \
   --extra-index-url https://wheels.vllm.ai/0.28.0/cu129
 
 # this project (server, client, offline inference)
-git clone https://github.com/TimeKettle/Babelfish.git && cd Babelfish
+git clone https://github.com/timekettle/Babelfish-SimulMT.git && cd Babelfish-SimulMT
 pip install -e .
 ```
 
 ### 2.2 Downloading the model
 
 ```bash
-# Hugging Face
-hf download TimeKettle/Babelfish-30B-A3B --local-dir models/Babelfish-30B-A3B
-# ModelScope
-pip install modelscope
-modelscope download --model TimeKettle/Babelfish-30B-A3B --local_dir models/Babelfish-30B-A3B
+# Hugging Face (downloads only the FP16 subfolder into models/Babelfish-30B-A3B)
+hf download timekettle/Babelfish-SimulMT --include "Babelfish-30B-A3B/*" --local-dir models
 ```
 
 Use `Babelfish-30B-A3B-FP8` for the FP8 version. The GGUF version is covered in section 7.
@@ -85,9 +82,9 @@ Use `Babelfish-30B-A3B-FP8` for the FP8 version. The GGUF version is covered in 
 `scripts/deploy.sh` (optionally) creates an environment and installs the dependencies, downloads the model if given an ID, and starts the server in the foreground. It is ready when it prints `Ready: http://127.0.0.1:8080/`; Ctrl+C stops it. Environment, models and logs are kept in `.simulst/`.
 
 ```bash
-bash scripts/deploy.sh --install --model TimeKettle/Babelfish-30B-A3B                 # new environment, CUDA 13 driver
-bash scripts/deploy.sh --install --cu129 --model TimeKettle/Babelfish-30B-A3B         # new environment, CUDA 12.x driver
-bash scripts/deploy.sh --install --model TimeKettle/Babelfish-30B-A3B --source modelscope
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B         # new environment, CUDA 13 driver
+bash scripts/deploy.sh --install --cu129 --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B # new environment, CUDA 12.x driver
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8     # FP8 version
 bash scripts/deploy.sh --python /path/to/env/bin/python --model models/Babelfish-30B-A3B --gpus 0
 bash scripts/deploy.sh --python /path/to/env/bin/python --model models/Babelfish-30B-A3B --gpus 0,1   # tensor parallel
 bash scripts/deploy.sh --model models/Babelfish-30B-A3B --dry-run                     # print the commands only
@@ -95,8 +92,7 @@ bash scripts/deploy.sh --model models/Babelfish-30B-A3B --dry-run               
 
 | Option | Meaning | Default |
 |---|---|---|
-| `--model` | Hugging Face / ModelScope model ID, or a local directory | required |
-| `--source` | where to download a model ID from: `hf` or `modelscope` | `hf` |
+| `--model` | Hugging Face model ID (`repo` or `repo/subfolder`), or a local directory | required |
 | `--install` | create `.simulst/env` and install vLLM and this project | off |
 | `--cu129` | install the CUDA 12.9 builds of vLLM / torch (for CUDA 12.x drivers) | off |
 | `--python` | Python of an existing environment | `python3` |
@@ -314,7 +310,7 @@ For Qwen3-Omni audio, llama.cpp pads the last partial second to a full second an
 ```bash
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
 git checkout 3f8af15a76ac8675812e856da45454bafc90f12c        # the patch is made against this commit (2026-11-02)
-git apply /path/to/Babelfish/patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch
+git apply /path/to/Babelfish-SimulMT/patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch
 cmake -B build -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j --target llama-server
 ```
@@ -328,7 +324,7 @@ cmake --build build -j --target llama-server
 One-command script (starts llama-server, then the web / API service; Ctrl+C stops both):
 
 ```bash
-bash scripts/deploy_llamacpp.sh --model TimeKettle/Babelfish-30B-A3B-GGUF --quant Q4_K_M \
+bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-GGUF --quant Q4_K_M \
   --llama-server /path/to/llama.cpp/build/bin/llama-server --gpus 0 [--sessions 4] [--beams 1]
 ```
 

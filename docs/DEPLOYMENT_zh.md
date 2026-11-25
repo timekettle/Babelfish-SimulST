@@ -62,7 +62,7 @@ pip install "vllm==0.28.0+cu129" "torch==2.13.0+cu129" \
   --extra-index-url https://wheels.vllm.ai/0.28.0/cu129
 
 # 本项目（服务、客户端、离线推理）
-git clone https://github.com/TimeKettle/Babelfish.git && cd Babelfish
+git clone https://github.com/timekettle/Babelfish-SimulMT.git && cd Babelfish-SimulMT
 pip install -e .
 ```
 
@@ -71,11 +71,8 @@ pip install -e .
 ### 2.2 下载模型
 
 ```bash
-# Hugging Face
-hf download TimeKettle/Babelfish-30B-A3B --local-dir models/Babelfish-30B-A3B
-# ModelScope
-pip install modelscope
-modelscope download --model TimeKettle/Babelfish-30B-A3B --local_dir models/Babelfish-30B-A3B
+# Hugging Face（仅下载 FP16 子目录到 models/Babelfish-30B-A3B）
+hf download timekettle/Babelfish-SimulMT --include "Babelfish-30B-A3B/*" --local-dir models
 ```
 
 FP8 版把名字换成 `Babelfish-30B-A3B-FP8`。GGUF 版见第 7 节。
@@ -87,9 +84,9 @@ FP8 版把名字换成 `Babelfish-30B-A3B-FP8`。GGUF 版见第 7 节。
 `scripts/deploy.sh` 依次完成：（可选）新建环境并安装依赖 → 下载模型（如果给的是模型 ID）→ 前台启动服务。看到 `Ready: http://127.0.0.1:8080/` 后即可访问，Ctrl+C 停止。环境、模型和日志保存在 `.simulst/`。
 
 ```bash
-bash scripts/deploy.sh --install --model TimeKettle/Babelfish-30B-A3B                 # 新环境，驱动支持 CUDA 13
-bash scripts/deploy.sh --install --cu129 --model TimeKettle/Babelfish-30B-A3B         # 新环境，驱动只到 CUDA 12.x
-bash scripts/deploy.sh --install --model TimeKettle/Babelfish-30B-A3B --source modelscope
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B         # 新环境，驱动支持 CUDA 13
+bash scripts/deploy.sh --install --cu129 --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B # 新环境，驱动只到 CUDA 12.x
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8     # FP8 版
 bash scripts/deploy.sh --python /path/to/env/bin/python --model models/Babelfish-30B-A3B --gpus 0
 bash scripts/deploy.sh --python /path/to/env/bin/python --model models/Babelfish-30B-A3B --gpus 0,1   # 两卡张量并行
 bash scripts/deploy.sh --model models/Babelfish-30B-A3B --dry-run                     # 只打印将执行的命令
@@ -97,8 +94,7 @@ bash scripts/deploy.sh --model models/Babelfish-30B-A3B --dry-run               
 
 | 参数 | 说明 | 默认 |
 |---|---|---|
-| `--model` | Hugging Face / ModelScope 模型 ID，或本地目录 | 必填 |
-| `--source` | 模型 ID 从哪里下载：`hf` 或 `modelscope` | `hf` |
+| `--model` | Hugging Face 模型 ID（`仓库` 或 `仓库/子目录`），或本地目录 | 必填 |
 | `--install` | 在 `.simulst/env` 新建环境并安装 vLLM 和本项目 | 不安装 |
 | `--cu129` | 安装 CUDA 12.9 构建的 vLLM / torch（驱动只到 CUDA 12.x 时用） | 否 |
 | `--python` | 使用已有环境的 Python | `python3` |
@@ -316,7 +312,7 @@ llama.cpp 处理 Qwen3-Omni 音频时，会把最后不满 1 秒的音频补零�
 ```bash
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
 git checkout 3f8af15a76ac8675812e856da45454bafc90f12c        # 补丁基于这个提交（2026-11-02）
-git apply /path/to/Babelfish/patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch
+git apply /path/to/Babelfish-SimulMT/patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch
 cmake -B build -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j --target llama-server
 ```
@@ -330,7 +326,7 @@ cmake --build build -j --target llama-server
 一键脚本（先启动 llama-server，就绪后启动网页 / 接口服务；Ctrl+C 一起停止）：
 
 ```bash
-bash scripts/deploy_llamacpp.sh --model TimeKettle/Babelfish-30B-A3B-GGUF --quant Q4_K_M \
+bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-GGUF --quant Q4_K_M \
   --llama-server /path/to/llama.cpp/build/bin/llama-server --gpus 0 [--sessions 4] [--beams 1]
 ```
 
