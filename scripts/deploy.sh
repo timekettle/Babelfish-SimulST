@@ -2,9 +2,9 @@
 # One-command deployment of the vLLM server: (optionally) create an environment, fetch the model, start the
 # web / API service in the foreground (Ctrl+C stops it).
 #
-#   bash scripts/deploy.sh --model TimeKettle/Babelfish-30B-A3B --install            # new environment + Hugging Face
-#   bash scripts/deploy.sh --model TimeKettle/Babelfish-30B-A3B --install --cu129    # driver only supports CUDA 12.x
-#   bash scripts/deploy.sh --model TimeKettle/Babelfish-30B-A3B-FP8 --source modelscope --install
+#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B --install          # new env + HF
+#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B --install --cu129  # CUDA 12.x driver
+#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8 --install      # FP8 subfolder
 #   bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --python /path/to/vllm-env/bin/python --gpus 0
 #   bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0,1              # tensor parallel over 2 GPUs
 #
@@ -81,18 +81,31 @@ if (( ! DRY )); then
 fi
 export PYTHONPATH=$REPO${PYTHONPATH:+:$PYTHONPATH}
 
-# 2. Model
+# 2. Model (supports local directory, owner/repo, or owner/repo/subfolder on Hugging Face)
 if [[ -d $MODEL ]]; then
   DIR=$(cd "$MODEL" && pwd)
 else
-  DIR=$RUNTIME/models/$(basename "$MODEL")
+  IFS=/ read -r _m_org _m_repo _m_sub <<< "$MODEL"
+  if [[ -n ${_m_sub:-} ]]; then
+    REPO_ID="$_m_org/$_m_repo"
+    SUBDIR="$_m_sub"
+    DL_ROOT=$RUNTIME/models/$_m_repo
+    DIR=$DL_ROOT/$SUBDIR
+  else
+    REPO_ID="$MODEL"
+    SUBDIR=""
+    DL_ROOT=$RUNTIME/models/$(basename "$MODEL")
+    DIR=$DL_ROOT
+  fi
   if [[ ! -f $DIR/config.json ]]; then
     say "downloading $MODEL ($SOURCE) to $DIR"
     if (( ! DRY )); then
       if [[ $SOURCE == modelscope ]]; then
-        "$PY" -c "import sys; from modelscope import snapshot_download as d; d(sys.argv[1], local_dir=sys.argv[2])" "$MODEL" "$DIR"
+        "$PY" -c "import sys; from modelscope import snapshot_download as d; d(sys.argv[1], local_dir=sys.argv[2])" "$REPO_ID" "$DL_ROOT"
+      elif [[ -n $SUBDIR ]]; then
+        "$PY" -c "import sys; from huggingface_hub import snapshot_download as d; d(sys.argv[1], local_dir=sys.argv[2], allow_patterns=[sys.argv[3] + '/*'])" "$REPO_ID" "$DL_ROOT" "$SUBDIR"
       else
-        "$PY" -c "import sys; from huggingface_hub import snapshot_download as d; d(sys.argv[1], local_dir=sys.argv[2])" "$MODEL" "$DIR"
+        "$PY" -c "import sys; from huggingface_hub import snapshot_download as d; d(sys.argv[1], local_dir=sys.argv[2])" "$REPO_ID" "$DL_ROOT"
       fi
     fi
   fi

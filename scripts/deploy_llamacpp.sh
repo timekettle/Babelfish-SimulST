@@ -4,7 +4,7 @@
 # build llama-server with the audio patch in patches/llama.cpp (see docs/DEPLOYMENT.md).
 #
 #   bash scripts/deploy_llamacpp.sh --model /path/to/Babelfish-30B-A3B-GGUF --quant Q4_K_M --llama-server /path/to/llama-server
-#   bash scripts/deploy_llamacpp.sh --model TimeKettle/Babelfish-30B-A3B-GGUF --quant Q8_0 --gpus 0 --beams 2
+#   bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-GGUF --quant Q8_0 --gpus 0 --beams 2
 #
 # Options: --model DIR|ID  --quant Q8_0|Q4_K_M  --source hf|modelscope  --llama-server PATH  --python PY  --gpus LIST
 #          --sessions N (concurrent sessions, default 4)  --beams N (default 1 = greedy)  --ngl N (layers on the GPU)
@@ -41,18 +41,33 @@ GGUF=Babelfish-30B-A3B-$QUANT.gguf
 MMPROJ=mmproj-Babelfish-30B-A3B-F16.gguf
 mkdir -p "$RUNTIME"
 
-# 1. model files
+# 1. model files (supports local directory, owner/repo, or owner/repo/subfolder on Hugging Face)
 if [[ -d $MODEL ]]; then
   DIR=$(cd "$MODEL" && pwd)
 else
-  DIR=$RUNTIME/models/$(basename "$MODEL")
+  IFS=/ read -r _m_org _m_repo _m_sub <<< "$MODEL"
+  if [[ -n ${_m_sub:-} ]]; then
+    REPO_ID="$_m_org/$_m_repo"
+    SUBDIR="$_m_sub"
+    DL_ROOT=$RUNTIME/models/$_m_repo
+    DIR=$DL_ROOT/$SUBDIR
+    PAT1="$SUBDIR/$GGUF"
+    PAT2="$SUBDIR/$MMPROJ"
+  else
+    REPO_ID="$MODEL"
+    SUBDIR=""
+    DL_ROOT=$RUNTIME/models/$(basename "$MODEL")
+    DIR=$DL_ROOT
+    PAT1="$GGUF"
+    PAT2="$MMPROJ"
+  fi
   if [[ ! -f $DIR/$GGUF || ! -f $DIR/$MMPROJ ]]; then
     say "downloading $GGUF and $MMPROJ from $MODEL ($SOURCE)"
     if (( ! DRY )); then
       if [[ $SOURCE == modelscope ]]; then
-        "$PY" -c "import sys; from modelscope import snapshot_download as d; d(sys.argv[1], local_dir=sys.argv[2], allow_patterns=sys.argv[3:])" "$MODEL" "$DIR" "$GGUF" "$MMPROJ"
+        "$PY" -c "import sys; from modelscope import snapshot_download as d; d(sys.argv[1], local_dir=sys.argv[2], allow_patterns=sys.argv[3:])" "$REPO_ID" "$DL_ROOT" "$PAT1" "$PAT2"
       else
-        "$PY" -c "import sys; from huggingface_hub import snapshot_download as d; d(sys.argv[1], local_dir=sys.argv[2], allow_patterns=sys.argv[3:])" "$MODEL" "$DIR" "$GGUF" "$MMPROJ"
+        "$PY" -c "import sys; from huggingface_hub import snapshot_download as d; d(sys.argv[1], local_dir=sys.argv[2], allow_patterns=sys.argv[3:])" "$REPO_ID" "$DL_ROOT" "$PAT1" "$PAT2"
       fi
     fi
   fi
