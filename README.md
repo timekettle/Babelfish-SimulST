@@ -7,7 +7,6 @@
 <div align="center">
 
 [![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Babelfish-ffc107)](https://huggingface.co/TimeKettle)
-[![ModelScope](https://img.shields.io/badge/ModelScope-Babelfish-624aff)](https://www.modelscope.cn/organization/TimeKettle)
 [![GitHub](https://img.shields.io/badge/GitHub-Babelfish-181717?logo=github)](https://github.com/TimeKettle/Babelfish)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 
@@ -136,9 +135,9 @@ COMET and CometKiwi are on a 0–100 scale. The best value in each column of eac
 
 | Model | Description | Framework | Download |
 |---|---|---|---|
-| Babelfish-30B-A3B | original FP16 model | vLLM | [Hugging Face](https://huggingface.co/TimeKettle/Babelfish-30B-A3B) · [ModelScope](https://www.modelscope.cn/models/TimeKettle/Babelfish-30B-A3B) |
-| Babelfish-30B-A3B-FP8 | FP8 (one scale per 128×128 block) | vLLM | [Hugging Face](https://huggingface.co/TimeKettle/Babelfish-30B-A3B-FP8) · [ModelScope](https://www.modelscope.cn/models/TimeKettle/Babelfish-30B-A3B-FP8) |
-| Babelfish-30B-A3B-GGUF | Q8_0 / Q4_K_M + audio encoder | llama.cpp | [Hugging Face](https://huggingface.co/TimeKettle/Babelfish-30B-A3B-GGUF) · [ModelScope](https://www.modelscope.cn/models/TimeKettle/Babelfish-30B-A3B-GGUF) |
+| Babelfish-30B-A3B | original FP16 model | vLLM | [Hugging Face](https://huggingface.co/TimeKettle/Babelfish-30B-A3B) |
+| Babelfish-30B-A3B-FP8 | FP8 (one scale per 128×128 block) | vLLM | [Hugging Face](https://huggingface.co/TimeKettle/Babelfish-30B-A3B-FP8) |
+| Babelfish-30B-A3B-GGUF | Q8_0 / Q4_K_M + audio encoder | llama.cpp | [Hugging Face](https://huggingface.co/TimeKettle/Babelfish-30B-A3B-GGUF) |
 
 | Version | Weights | GPU memory | Quality | Use |
 |---|---|---|---|---|
@@ -169,8 +168,6 @@ This creates an environment in `.simulst/env`, installs vLLM and this project, d
 More examples:
 
 ```bash
-# download from ModelScope
-bash scripts/deploy.sh --install --model TimeKettle/Babelfish-30B-A3B --source modelscope
 # NVIDIA driver supports CUDA 12.x only: install the CUDA 12.9 builds of vLLM / torch
 bash scripts/deploy.sh --install --cu129 --model TimeKettle/Babelfish-30B-A3B
 # existing vLLM environment, local model
