@@ -1,30 +1,35 @@
 #!/usr/bin/env bash
-# One-command deployment of the vLLM server: (optionally) create an environment, fetch the model, start the
-# web / API service in the foreground (Ctrl+C stops it).
+# One-command deployment of the vLLM server: (optionally) create/use a conda environment, fetch the model,
+# and start the web / API service in the foreground (Ctrl+C stops it).
 #
-#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B --install          # new env + HF
+#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B --install          # conda env + HF
 #   bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B --install --cu129  # CUDA 12.x driver
 #   bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8 --install      # FP8 subfolder
-#   bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --python /path/to/vllm-env/bin/python --gpus 0
-#   bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0,1              # tensor parallel over 2 GPUs
+#   bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0                               # active conda env
+#   bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0,1                             # 2-GPU tensor parallel
 #
-# Options: --model ID|DIR  --source hf|modelscope  --install  --cu129  --python PY  --gpus LIST  --tp N  --host H
-#          --port P  --beams N  --max-sessions N  --gpu-mem F  --runtime-dir DIR  --no-start  --dry-run  (after --: server args)
-# Environment: VLLM_VERSION (default 0.28.0), TORCH_VERSION (default 2.13.0, used with --cu129),
-#              PIP_INDEX_URL (pip mirror), SIMULST_PYTHON (python used to create the environment, default python3).
+# Options: --model ID|DIR  --source hf|modelscope  --install  --conda-env NAME  --cu129  --python PY  --gpus LIST
+#          --tp N  --host H  --port P  --beams N  --max-sessions N  --gpu-mem F  --runtime-dir DIR  --no-start
+#          --dry-run  (after --: server args)
+# Environment: CONDA_ENV (default babelfish), PYTHON_VERSION (default 3.12),
+#              VLLM_VERSION (default 0.28.0), TORCH_VERSION (default 2.13.0, used with --cu129), PIP_INDEX_URL.
 set -euo pipefail
 REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 MODEL='' SOURCE=hf INSTALL=0 CU129=0 PY='' GPUS='' TP='' HOST=0.0.0.0 PORT=8080 BEAMS=1 SESSIONS=4 GPU_MEM=0.9 DRY=0 START=1
+CONDA_ENV_OPT=''
+CONDA_ENV=${CONDA_ENV:-babelfish}
+PYTHON_VERSION=${PYTHON_VERSION:-3.12}
 RUNTIME=$REPO/.simulst
 EXTRA=()
 VLLM_VERSION=${VLLM_VERSION:-0.28.0}
 TORCH_VERSION=${TORCH_VERSION:-2.13.0}
-usage() { sed -n '2,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 while (( $# )); do
   case $1 in
     --model) MODEL=$2; shift 2 ;;
     --source) SOURCE=$2; shift 2 ;;
     --install) INSTALL=1; shift ;;
+    --conda-env) CONDA_ENV_OPT=$2; CONDA_ENV=$2; shift 2 ;;
     --cu129) CU129=1; shift ;;
     --python) PY=$2; shift 2 ;;
     --gpus) GPUS=$2; shift 2 ;;
@@ -50,20 +55,34 @@ fi
 mkdir -p "$RUNTIME"
 say() { echo "[deploy] $*"; }
 
-# 1. Python environment
+# 1. Python environment (conda)
 if (( INSTALL )); then
-  ENV=$RUNTIME/env
-  if [[ ! -x $ENV/bin/python ]]; then
-    say "creating $ENV"
-    (( DRY )) || "${SIMULST_PYTHON:-python3}" -m venv "$ENV"
-  fi
-  PY=$ENV/bin/python
-  if (( ! DRY )); then
-    if ! "$PY" -m pip --version > /dev/null 2>&1; then
-      echo "the new environment has no pip: install the venv module (Ubuntu: sudo apt install python3-venv) or set" >&2
-      echo "SIMULST_PYTHON to a Python 3.10+ that has it (e.g. a conda python), then delete $ENV and rerun" >&2
-      exit 1
+  if [[ -z $PY ]]; then
+    if [[ -z $CONDA_ENV_OPT && -n ${CONDA_PREFIX:-} && ${CONDA_DEFAULT_ENV:-base} != base && -x ${CONDA_PREFIX}/bin/python ]]; then
+      PY=${CONDA_PREFIX}/bin/python
+      say "using active conda env ${CONDA_DEFAULT_ENV} ($PY)"
+    else
+      if ! command -v conda > /dev/null 2>&1; then
+        if (( DRY )); then
+          say "conda create -n $CONDA_ENV python=$PYTHON_VERSION -y"
+          PY="<conda-env:$CONDA_ENV>/bin/python"
+        else
+          echo "conda not found: install Miniconda/Anaconda or activate a Python 3.10+ environment and pass --python" >&2
+          exit 1
+        fi
+      else
+        ENV_DIR=$(conda env list | awk -v name="$CONDA_ENV" '$1 == name { print $NF; exit }')
+        if [[ -z $ENV_DIR ]]; then
+          CONDA_BASE=$(conda info --base)
+          ENV_DIR="$CONDA_BASE/envs/$CONDA_ENV"
+          say "creating conda env $CONDA_ENV (python=$PYTHON_VERSION)"
+          (( DRY )) || conda create -n "$CONDA_ENV" "python=$PYTHON_VERSION" -y
+        fi
+        PY="$ENV_DIR/bin/python"
+      fi
     fi
+  fi
+  if (( ! DRY )); then
     "$PY" -m pip install -U pip
     if (( CU129 )); then
       "$PY" -m pip install "vllm==$VLLM_VERSION+cu129" "torch==$TORCH_VERSION+cu129" \
@@ -77,7 +96,7 @@ if (( INSTALL )); then
 fi
 PY=${PY:-python3}
 if (( ! DRY )); then
-  "$PY" -c 'import vllm' 2> /dev/null || { echo "vllm cannot be imported with $PY; use --install or --python" >&2; exit 1; }
+  "$PY" -c 'import vllm' 2> /dev/null || { echo "vllm cannot be imported with $PY; activate your conda env or use --install / --python" >&2; exit 1; }
 fi
 export PYTHONPATH=$REPO${PYTHONPATH:+:$PYTHONPATH}
 

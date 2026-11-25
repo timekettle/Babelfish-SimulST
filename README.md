@@ -151,37 +151,52 @@ COMET and CometKiwi are on a 0–100 scale. The best value in each column of eac
 
 ### Requirements
 
-- Linux, Python 3.10+, NVIDIA GPU: one 80 GB GPU for the FP16 model (or two 48 GB GPUs with tensor parallelism), 48 GB or more for the FP8 model;
+- Linux, Conda (Python 3.10+), NVIDIA GPU: one 80 GB GPU for the FP16 model (or two 48 GB GPUs with tensor parallelism), 48 GB or more for the FP8 model;
 - vLLM (tested with 0.28.0 and a 0.23 nightly, with transformers 5.13.1);
 - see below for the GGUF version with llama.cpp.
 
-### One-command deployment (vLLM)
+### Setup and deployment (vLLM)
+
+Create and activate a conda environment, then install the dependencies:
 
 ```bash
 git clone https://github.com/timekettle/Babelfish-SimulMT.git
 cd Babelfish-SimulMT
+
+conda create -n babelfish python=3.12 -y
+conda activate babelfish
+
+# driver supports CUDA 13 (>= 580)
+pip install vllm==0.28.0
+# driver supports CUDA 12.x only (e.g. 535 / 550): use this instead
+# pip install "vllm==0.28.0+cu129" "torch==2.13.0+cu129" \
+#   --extra-index-url https://download.pytorch.org/whl/cu129 \
+#   --extra-index-url https://wheels.vllm.ai/0.28.0/cu129
+
+pip install -e .
+```
+
+With the `babelfish` environment active, start the server (passing a model ID downloads it automatically; once you see `Ready: http://127.0.0.1:8080/` it is ready; Ctrl+C stops it):
+
+```bash
+# download from Hugging Face and start (FP16)
+bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B
+# FP8 version
+bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8
+# local model, single GPU or tensor parallelism over two GPUs
+bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0
+bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0,1
+```
+
+You can also pass `--install` to let the script create and set up the `babelfish` conda environment automatically (add `--cu129` for CUDA 12.x drivers):
+
+```bash
 bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B
 ```
 
-This creates an environment in `.simulst/env`, installs vLLM and this project, downloads the model and starts the server. Once you see `Ready: http://127.0.0.1:8080/` it is ready; Ctrl+C stops it.
-
-More examples:
+Or start the server directly inside the `babelfish` conda environment:
 
 ```bash
-# NVIDIA driver supports CUDA 12.x only: install the CUDA 12.9 builds of vLLM / torch
-bash scripts/deploy.sh --install --cu129 --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B
-# existing vLLM environment, local model
-bash scripts/deploy.sh --python /path/to/env/bin/python --model /path/to/Babelfish-30B-A3B --gpus 0
-# FP8 version
-bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8
-# tensor parallelism over two GPUs
-bash scripts/deploy.sh --python /path/to/env/bin/python --model /path/to/Babelfish-30B-A3B --gpus 0,1
-```
-
-Or start the server directly:
-
-```bash
-pip install -e .        # in an environment that has vLLM
 python -m simulst.server --model /path/to/Babelfish-30B-A3B --port 8080
 ```
 

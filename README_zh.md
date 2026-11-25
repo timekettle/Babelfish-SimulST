@@ -151,37 +151,52 @@ COMET 和 CometKiwi 为百分制（0–100）；每个指标每列最好的值�
 
 ### 环境要求
 
-- Linux，Python 3.10 及以上，NVIDIA GPU：FP16 版需要 1 张 80 GB 显卡（或 2 张 48 GB 做张量并行），FP8 版需要 48 GB 及以上显存；
+- Linux，Conda（Python 3.10 及以上），NVIDIA GPU：FP16 版需要 1 张 80 GB 显卡（或 2 张 48 GB 做张量并行），FP8 版需要 48 GB 及以上显存；
 - vLLM（已测试 0.28.0 和 0.23 nightly，配 transformers 5.13.1）；
 - llama.cpp 部署 GGUF 版的要求见下文。
 
-### 一键部署（vLLM）
+### 环境配置与部署（vLLM）
+
+先创建并激活 conda 环境，再安装依赖：
 
 ```bash
 git clone https://github.com/timekettle/Babelfish-SimulMT.git
 cd Babelfish-SimulMT
+
+conda create -n babelfish python=3.12 -y
+conda activate babelfish
+
+# 驱动支持 CUDA 13（>= 580）
+pip install vllm==0.28.0
+# 显卡驱动只支持到 CUDA 12.x（例如 535 / 550）时，改用下面这行：
+# pip install "vllm==0.28.0+cu129" "torch==2.13.0+cu129" \
+#   --extra-index-url https://download.pytorch.org/whl/cu129 \
+#   --extra-index-url https://wheels.vllm.ai/0.28.0/cu129
+
+pip install -e .
+```
+
+激活 `babelfish` 环境后启动服务（传入模型 ID 会自动下载模型；看到 `Ready: http://127.0.0.1:8080/` 后即可使用，按 Ctrl+C 停止）：
+
+```bash
+# 从 Hugging Face 下载并启动（FP16 原版）
+bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B
+# FP8 版
+bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8
+# 本地权重，指定单卡或两卡张量并行
+bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0
+bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0,1
+```
+
+也可以给脚本加 `--install`，自动创建并配置名为 `babelfish` 的 conda 环境（驱动只到 CUDA 12.x 时加 `--cu129`）：
+
+```bash
 bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B
 ```
 
-命令会在 `.simulst/env` 新建环境并安装 vLLM 和本项目、下载模型、启动服务。看到 `Ready: http://127.0.0.1:8080/` 后即可使用，按 Ctrl+C 停止。
-
-常用写法：
+或不用脚本，在 `babelfish` conda 环境里直接启动服务：
 
 ```bash
-# 显卡驱动只支持到 CUDA 12.x：安装 CUDA 12.9 构建的 vLLM / torch
-bash scripts/deploy.sh --install --cu129 --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B
-# 已有 vLLM 环境、模型已在本地
-bash scripts/deploy.sh --python /path/to/env/bin/python --model /path/to/Babelfish-30B-A3B --gpus 0
-# FP8 版
-bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8
-# 两张卡张量并行
-bash scripts/deploy.sh --python /path/to/env/bin/python --model /path/to/Babelfish-30B-A3B --gpus 0,1
-```
-
-也可以不用脚本，直接启动服务：
-
-```bash
-pip install -e .        # 在已装好 vLLM 的环境里
 python -m simulst.server --model /path/to/Babelfish-30B-A3B --port 8080
 ```
 

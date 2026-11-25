@@ -47,10 +47,11 @@ Rule of thumb for one A800: about 2 sessions with beam size 2, or about 4 with g
 
 ### 2.1 vLLM environment
 
-Linux, Python 3.10+ with venv / pip (Ubuntu's system python3 needs `sudo apt install python3-venv`; a conda Python also works) and an NVIDIA driver. Tested: vLLM 0.28.0 (torch 2.13) and a vLLM 0.23 nightly (torch 2.11), both with transformers 5.13.1.
+Linux, Conda (Python 3.10+) and an NVIDIA driver. Tested: vLLM 0.28.0 (torch 2.13) and a vLLM 0.23 nightly (torch 2.11), both with transformers 5.13.1.
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
+conda create -n babelfish python=3.12 -y
+conda activate babelfish
 pip install -U pip
 
 # driver supports CUDA 13 (>= 580)
@@ -79,30 +80,35 @@ Use `Babelfish-30B-A3B-FP8` for the FP8 version. The GGUF version is covered in 
 
 ### 3.1 One-command script
 
-`scripts/deploy.sh` (optionally) creates an environment and installs the dependencies, downloads the model if given an ID, and starts the server in the foreground. It is ready when it prints `Ready: http://127.0.0.1:8080/`; Ctrl+C stops it. Environment, models and logs are kept in `.simulst/`.
+`scripts/deploy.sh` (optionally) creates / uses a conda environment and installs the dependencies, downloads the model if given an ID, and starts the server in the foreground. It is ready when it prints `Ready: http://127.0.0.1:8080/`; Ctrl+C stops it. Downloaded models and logs are kept in `.simulst/`.
 
 ```bash
-bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B         # new environment, CUDA 13 driver
-bash scripts/deploy.sh --install --cu129 --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B # new environment, CUDA 12.x driver
-bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8     # FP8 version
-bash scripts/deploy.sh --python /path/to/env/bin/python --model models/Babelfish-30B-A3B --gpus 0
-bash scripts/deploy.sh --python /path/to/env/bin/python --model models/Babelfish-30B-A3B --gpus 0,1   # tensor parallel
-bash scripts/deploy.sh --model models/Babelfish-30B-A3B --dry-run                     # print the commands only
+# start directly inside an active conda environment
+conda activate babelfish
+bash scripts/deploy.sh --model models/Babelfish-30B-A3B --gpus 0
+bash scripts/deploy.sh --model models/Babelfish-30B-A3B --gpus 0,1                                # tensor parallel
+
+# or pass --install to create the `babelfish` conda environment automatically
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B           # CUDA 13 driver
+bash scripts/deploy.sh --install --cu129 --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B   # CUDA 12.x driver
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8       # FP8 version
+bash scripts/deploy.sh --model models/Babelfish-30B-A3B --dry-run                                 # print the commands only
 ```
 
 | Option | Meaning | Default |
 |---|---|---|
 | `--model` | Hugging Face model ID (`repo` or `repo/subfolder`), or a local directory | required |
-| `--install` | create `.simulst/env` and install vLLM and this project | off |
+| `--install` | create / use a conda environment and install vLLM and this project | off |
+| `--conda-env` | conda environment name for `--install` (reuses active non-base conda env by default) | `babelfish` |
 | `--cu129` | install the CUDA 12.9 builds of vLLM / torch (for CUDA 12.x drivers) | off |
-| `--python` | Python of an existing environment | `python3` |
+| `--python` | explicit Python of an existing environment (defaults to active conda `python3`) | `python3` |
 | `--gpus` | GPUs to use, e.g. `0` or `0,1`; tensor parallel size defaults to the number of GPUs | all visible |
 | `--tp` | tensor parallel size | number of GPUs |
 | `--host` / `--port` | listen address / port | `0.0.0.0` / `8080` |
 | `--beams` | default beam size: 1 = greedy (default, faster), 2 = beam search | `1` |
 | `--max-sessions` | maximum concurrent sessions | `4` |
 | `--gpu-mem` | vLLM GPU memory fraction | `0.9` |
-| `--runtime-dir` | environment, models and logs | `.simulst` |
+| `--runtime-dir` | downloaded models and logs | `.simulst` |
 | after `--` | passed to `simulst.server` unchanged | |
 
 ### 3.2 Starting directly

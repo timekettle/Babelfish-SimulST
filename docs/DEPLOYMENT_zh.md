@@ -47,10 +47,11 @@
 
 ### 2.1 vLLM 环境
 
-需要 Linux、Python 3.10 及以上（带 venv / pip；Ubuntu 自带的 python3 要先 `sudo apt install python3-venv`，也可以用 conda 的 Python）和 NVIDIA 驱动。已测试的组合：vLLM 0.28.0（torch 2.13）和 vLLM 0.23 nightly（torch 2.11），都配 transformers 5.13.1。
+需要 Linux、Conda（Python 3.10 及以上）和 NVIDIA 驱动。已测试的组合：vLLM 0.28.0（torch 2.13）和 vLLM 0.23 nightly（torch 2.11），都配 transformers 5.13.1。
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
+conda create -n babelfish python=3.12 -y
+conda activate babelfish
 pip install -U pip
 
 # 驱动支持 CUDA 13（>= 580）：直接安装
@@ -81,30 +82,35 @@ FP8 版把名字换成 `Babelfish-30B-A3B-FP8`。GGUF 版见第 7 节。
 
 ### 3.1 一键部署脚本
 
-`scripts/deploy.sh` 依次完成：（可选）新建环境并安装依赖 → 下载模型（如果给的是模型 ID）→ 前台启动服务。看到 `Ready: http://127.0.0.1:8080/` 后即可访问，Ctrl+C 停止。环境、模型和日志保存在 `.simulst/`。
+`scripts/deploy.sh` 依次完成：（可选）创建 / 使用 conda 环境并安装依赖 → 下载模型（如果给的是模型 ID）→ 前台启动服务。看到 `Ready: http://127.0.0.1:8080/` 后即可访问，Ctrl+C 停止。自动下载的模型和日志保存在 `.simulst/`。
 
 ```bash
-bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B         # 新环境，驱动支持 CUDA 13
-bash scripts/deploy.sh --install --cu129 --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B # 新环境，驱动只到 CUDA 12.x
-bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8     # FP8 版
-bash scripts/deploy.sh --python /path/to/env/bin/python --model models/Babelfish-30B-A3B --gpus 0
-bash scripts/deploy.sh --python /path/to/env/bin/python --model models/Babelfish-30B-A3B --gpus 0,1   # 两卡张量并行
-bash scripts/deploy.sh --model models/Babelfish-30B-A3B --dry-run                     # 只打印将执行的命令
+# 已激活 babelfish conda 环境时直接启动
+conda activate babelfish
+bash scripts/deploy.sh --model models/Babelfish-30B-A3B --gpus 0
+bash scripts/deploy.sh --model models/Babelfish-30B-A3B --gpus 0,1                                # 两卡张量并行
+
+# 也可加 --install 自动创建名为 babelfish 的 conda 环境并安装依赖
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B           # 驱动支持 CUDA 13
+bash scripts/deploy.sh --install --cu129 --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B   # 驱动只到 CUDA 12.x
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8       # FP8 版
+bash scripts/deploy.sh --model models/Babelfish-30B-A3B --dry-run                                 # 只打印将执行的命令
 ```
 
 | 参数 | 说明 | 默认 |
 |---|---|---|
 | `--model` | Hugging Face 模型 ID（`仓库` 或 `仓库/子目录`），或本地目录 | 必填 |
-| `--install` | 在 `.simulst/env` 新建环境并安装 vLLM 和本项目 | 不安装 |
+| `--install` | 创建 / 使用 conda 环境并安装 vLLM 和本项目 | 不安装 |
+| `--conda-env` | `--install` 使用的 conda 环境名（已激活非 base 环境时默认复用当前环境） | `babelfish` |
 | `--cu129` | 安装 CUDA 12.9 构建的 vLLM / torch（驱动只到 CUDA 12.x 时用） | 否 |
-| `--python` | 使用已有环境的 Python | `python3` |
+| `--python` | 显式指定已有环境的 Python（默认使用当前激活的 conda 环境 `python3`） | `python3` |
 | `--gpus` | 使用的 GPU，例如 `0` 或 `0,1`；张量并行数默认等于卡数 | 全部可见 |
 | `--tp` | 张量并行数 | 卡数 |
 | `--host` / `--port` | 监听地址 / 端口 | `0.0.0.0` / `8080` |
 | `--beams` | 默认束宽：1 为贪心（默认，更快），2 为束搜索 | `1` |
 | `--max-sessions` | 最大并发会话数 | `4` |
 | `--gpu-mem` | vLLM 显存占比 | `0.9` |
-| `--runtime-dir` | 环境、模型、日志目录 | `.simulst` |
+| `--runtime-dir` | 自动下载的模型和日志目录 | `.simulst` |
 | `--` 之后 | 原样传给 `simulst.server` | |
 
 ### 3.2 直接启动
