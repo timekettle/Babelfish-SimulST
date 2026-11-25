@@ -6,7 +6,7 @@
 
 <div align="center">
 
-[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Babelfish-ffc107)](https://huggingface.co/TimeKettle)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Babelfish-ffc107)](https://huggingface.co/timekettle/Babelfish-SimulMT)
 [![GitHub](https://img.shields.io/badge/GitHub-Babelfish-181717?logo=github)](https://github.com/TimeKettle/Babelfish)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 
@@ -135,9 +135,9 @@ COMET 和 CometKiwi 为百分制（0–100）；每个指标每列最好的值�
 
 | 模型名 | 简介 | 推理框架 | 下载 |
 |---|---|---|---|
-| Babelfish-30B-A3B | FP16 原版 | vLLM | [Hugging Face](https://huggingface.co/TimeKettle/Babelfish-30B-A3B) |
-| Babelfish-30B-A3B-FP8 | FP8 量化（逐 128×128 块缩放） | vLLM | [Hugging Face](https://huggingface.co/TimeKettle/Babelfish-30B-A3B-FP8) |
-| Babelfish-30B-A3B-GGUF | Q8_0 / Q4_K_M + 音频编码器 | llama.cpp | [Hugging Face](https://huggingface.co/TimeKettle/Babelfish-30B-A3B-GGUF) |
+| Babelfish-30B-A3B | FP16 原版 | vLLM | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulMT/tree/main/Babelfish-30B-A3B) |
+| Babelfish-30B-A3B-FP8 | FP8 量化（逐 128×128 块缩放） | vLLM | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulMT/tree/main/Babelfish-30B-A3B-FP8) |
+| Babelfish-30B-A3B-GGUF | Q8_0 / Q4_K_M + 音频编码器 | llama.cpp | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulMT/tree/main/Babelfish-30B-A3B-GGUF) |
 
 | 版本 | 权重大小 | 显存 | 质量 | 适合 |
 |---|---|---|---|---|
