@@ -20,11 +20,11 @@
     <td align="center"><b>Chinese → English</b></td>
   </tr>
   <tr>
-    <td align="center"><video src="https://github.com/user-attachments/assets/7decba92-c857-48b8-98de-5a14d7283996" width="380" controls></video></td>
-    <td align="center"><video src="https://github.com/user-attachments/assets/55a6d8bf-3a24-42d9-b3f5-7a604713e2b3" width="380" controls></video></td>
+    <td align="center"><video src="https://github.com/user-attachments/assets/166bb4c8-92e4-46b6-a2a8-ae51116bcb96" width="380" controls></video></td>
+    <td align="center"><video src="https://github.com/user-attachments/assets/ae1ecb7b-96f1-4a4c-b120-3bff67feb0d6" width="380" controls></video></td>
   </tr>
 </table>
-<sub>The translations in the demos are generated in real time by the Babelfish-30B-A3B model released here (beam size 2).<br>The source transcript and translated speech in the UI come from separate ASR and TTS models not part of this release.</sub>
+<sub>The translations in the demos are generated in real time by the Babelfish-30B-A3B model released here (beam size 2).<br>The source transcript and translated speech (with speaker voice cloning) shown in the UI come from separate ASR and TTS models not part of this release.</sub>
 </div>
 
 ## Introduction
