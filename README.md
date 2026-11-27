@@ -1,5 +1,9 @@
 **English** | [简体中文](README_zh.md)
 
+<p align="center">
+  <img src="assets/timekettle_logo.png" alt="Timekettle" width="220" />
+</p>
+
 <h1 align="center">Babelfish</h1>
 
 <p align="center"><b>Low-latency, high-quality streaming simultaneous translation between English and Chinese</b></p>

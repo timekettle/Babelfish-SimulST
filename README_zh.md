@@ -1,5 +1,9 @@
 [English](README.md) | **简体中文**
 
+<p align="center">
+  <img src="assets/timekettle_logo.png" alt="Timekettle" width="220" />
+</p>
+
 <h1 align="center">Babelfish</h1>
 
 <p align="center"><b>低延迟、高质量的英中双向流式同声传译模型</b></p>
