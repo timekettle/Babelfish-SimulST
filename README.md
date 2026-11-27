@@ -24,7 +24,7 @@
     <td align="center"><video src="https://github.com/user-attachments/assets/ae1ecb7b-96f1-4a4c-b120-3bff67feb0d6" width="380" controls></video></td>
   </tr>
 </table>
-<sub>The translations in the demos are generated in real time by the Babelfish-30B-A3B model released here (beam size 2).<br>The source transcript and translated speech (with speaker voice cloning) shown in the UI come from separate ASR and TTS models not part of this release.</sub>
+<sub>The translations in the demos are generated in real time by the Babelfish-30B-A3B model released here (beam size 2).<br>The source transcript and translated speech (with speaker voice cloning) shown in the UI come from separate ASR and TTS models not part of this release.<br>Demo translation latency: English → Chinese StreamLAAL 1.20 s (1.48 s with computation; first character 1.33 s), Chinese → English StreamLAAL 1.57 s (1.81 s with computation; first word 2.22 s); first-audio latency is 2.10 s and 4.47 s, respectively. First-audio latency is longer because the external voice-cloning TTS first buffers enough source speech to capture the speaker's timbre and waits for a complete initial phrase before synthesizing and playing audio (the Chinese → English demo opens with a longer clause), so voice quality and prosody remain natural.</sub>
 </div>
 
 ## Introduction
