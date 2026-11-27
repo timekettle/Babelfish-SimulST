@@ -45,7 +45,7 @@
 
 ## 效果
 
-我们在 Hy-SimulMT 公布的全部测试集（FLEURS、CoVoST 2、ACL 60/60、RealSI 单句、RealSI 长音频）加上 MCIF 长音频，共 11 个测试集上，对比了开源的 Hy-SimulMT 和四家商业同传服务。
+我们在 11 个涵盖单句与长音频的语音同传测试集（FLEURS、CoVoST 2、ACL 60/60、RealSI 单句、RealSI 长音频和 MCIF 长音频）上进行了评测，对比了开源模型 Hy-SimulMT-30B-A3B 以及四家商业同传服务（Qwen3.8-LiveTranslate、Seed LiveInterpret 2.0、GPT-Realtime-Translate、Gemini 3.5 Live Translate）。
 
 - **质量**：COMET 在 11 个测试集中有 10 个最高，CometKiwi 有 9 个最高；平均 COMET 英→中 85.5、中→英 80.9，次高的 Qwen3.8-LiveTranslate 为 84.3 和 79.7。唯一没有拿到最高 COMET 的是中→英 RealSI 长音频，比 Seed LiveInterpret 2.0 低 0.2。
 - **延迟**：LAAL 英→中 1.50–1.92 秒、中→英 1.97–2.15 秒，平均 1.74 秒和 2.08 秒。

@@ -45,7 +45,7 @@ Training code and training-data construction are not released at this time.
 
 ## Results
 
-We evaluated on every test set reported by Hy-SimulMT (FLEURS, CoVoST 2, ACL 60/60, RealSI sentences, RealSI long-form) plus MCIF long-form, 11 test sets in total, against the open Hy-SimulMT and four commercial simultaneous interpretation services.
+We evaluated on 11 speech translation benchmarks covering both sentence-level and long-form audio (FLEURS, CoVoST 2, ACL 60/60, RealSI sentences, RealSI long-form, and MCIF long-form), comparing against the open-source Hy-SimulMT-30B-A3B and four commercial simultaneous interpretation services: Qwen3.8-LiveTranslate, Seed LiveInterpret 2.0, GPT-Realtime-Translate, and Gemini 3.5 Live Translate.
 
 - **Quality**: the highest COMET on 10 of the 11 test sets and the highest CometKiwi on 9. Average COMET is 85.5 for English → Chinese and 80.9 for Chinese → English; the next best, Qwen3.8-LiveTranslate, has 84.3 and 79.7. The only set without the highest COMET is Chinese → English RealSI long-form, 0.2 below Seed LiveInterpret 2.0.
 - **Latency**: LAAL of 1.50–1.92 s for English → Chinese and 1.97–2.15 s for Chinese → English, 1.74 s and 2.08 s on average.
