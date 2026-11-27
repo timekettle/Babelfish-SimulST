@@ -258,7 +258,7 @@ python -m simulst.eval.score_sentences outputs/fleurs
 
 ## 贡献者
 
-邓士洋，李男杰，郭晓勇，徐海华，石伟，黄浩，邓贤苏，郭俊，罗元明，吴王政
+邓士洋，李男杰，徐海华，石伟，黄浩
 
 ## 引用
 
@@ -267,7 +267,7 @@ python -m simulst.eval.score_sentences outputs/fleurs
 ```bibtex
 @misc{babelfish2026,
   title  = {Babelfish: Low-Latency Streaming Simultaneous Speech Translation between English and Chinese},
-  author = {Shiyang Deng and Nanjie Li and Xiaoyong Guo and Haihua Xu and Wei Shi and Hao Huang and Xiansu Deng and Jun Guo and Yuanming Luo and Wangzheng Wu},
+  author = {Shiyang Deng and Nanjie Li and Haihua Xu and Wei Shi and Hao Huang},
   year   = {2026},
   url    = {https://github.com/timekettle/Babelfish-SimulST}
 }

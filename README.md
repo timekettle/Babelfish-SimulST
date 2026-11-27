@@ -258,7 +258,7 @@ Code and model weights are released under the [Apache License 2.0](LICENSE). The
 
 ## Contributors
 
-Shiyang Deng, Nanjie Li, Xiaoyong Guo, Haihua Xu, Wei Shi, Hao Huang, Xiansu Deng, Jun Guo, Yuanming Luo, Wangzheng Wu
+Shiyang Deng, Nanjie Li, Haihua Xu, Wei Shi, Hao Huang
 
 ## Citation
 
@@ -267,7 +267,7 @@ If Babelfish helps your work, please cite:
 ```bibtex
 @misc{babelfish2026,
   title  = {Babelfish: Low-Latency Streaming Simultaneous Speech Translation between English and Chinese},
-  author = {Shiyang Deng and Nanjie Li and Xiaoyong Guo and Haihua Xu and Wei Shi and Hao Huang and Xiansu Deng and Jun Guo and Yuanming Luo and Wangzheng Wu},
+  author = {Shiyang Deng and Nanjie Li and Haihua Xu and Wei Shi and Hao Huang},
   year   = {2026},
   url    = {https://github.com/timekettle/Babelfish-SimulST}
 }
