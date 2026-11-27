@@ -6,8 +6,8 @@
 
 <div align="center">
 
-[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Babelfish-ffc107)](https://huggingface.co/timekettle/Babelfish-SimulMT)
-[![GitHub](https://img.shields.io/badge/GitHub-Babelfish-181717?logo=github)](https://github.com/timekettle/Babelfish-SimulMT)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Babelfish-ffc107)](https://huggingface.co/timekettle/Babelfish-SimulST)
+[![GitHub](https://img.shields.io/badge/GitHub-Babelfish-181717?logo=github)](https://github.com/timekettle/Babelfish-SimulST)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 
 </div>
@@ -135,9 +135,9 @@ COMET and CometKiwi are on a 0–100 scale. The best value in each column of eac
 
 | Model | Description | Framework | Download |
 |---|---|---|---|
-| Babelfish-30B-A3B | original FP16 model | vLLM | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulMT/tree/main/Babelfish-30B-A3B) |
-| Babelfish-30B-A3B-FP8 | FP8 (one scale per 128×128 block) | vLLM | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulMT/tree/main/Babelfish-30B-A3B-FP8) |
-| Babelfish-30B-A3B-GGUF | Q8_0 / Q4_K_M + audio encoder | llama.cpp | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulMT/tree/main/Babelfish-30B-A3B-GGUF) |
+| Babelfish-30B-A3B | original FP16 model | vLLM | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulST/tree/main/Babelfish-30B-A3B) |
+| Babelfish-30B-A3B-FP8 | FP8 (one scale per 128×128 block) | vLLM | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulST/tree/main/Babelfish-30B-A3B-FP8) |
+| Babelfish-30B-A3B-GGUF | Q8_0 / Q4_K_M + audio encoder | llama.cpp | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulST/tree/main/Babelfish-30B-A3B-GGUF) |
 
 | Version | Weights | GPU memory | Quality | Use |
 |---|---|---|---|---|
@@ -160,8 +160,8 @@ COMET and CometKiwi are on a 0–100 scale. The best value in each column of eac
 Create and activate a conda environment, then install the dependencies:
 
 ```bash
-git clone https://github.com/timekettle/Babelfish-SimulMT.git
-cd Babelfish-SimulMT
+git clone https://github.com/timekettle/Babelfish-SimulST.git
+cd Babelfish-SimulST
 
 conda create -n babelfish python=3.12 -y
 conda activate babelfish
@@ -180,9 +180,9 @@ With the `babelfish` environment active, start the server (passing a model ID do
 
 ```bash
 # download from Hugging Face and start (FP16)
-bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B
+bash scripts/deploy.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B
 # FP8 version
-bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8
+bash scripts/deploy.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B-FP8
 # local model, single GPU or tensor parallelism over two GPUs
 bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0
 bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0,1
@@ -191,7 +191,7 @@ bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0,1
 You can also pass `--install` to let the script create and set up the `babelfish` conda environment automatically (add `--cu129` for CUDA 12.x drivers):
 
 ```bash
-bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B
 ```
 
 Or start the server directly inside the `babelfish` conda environment:
@@ -227,10 +227,10 @@ The GGUF version runs on llama.cpp (Q8_0 30.3 GiB / Q4_K_M 17.3 GiB, plus a 1.2 
 ```bash
 # build llama.cpp with the patch
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp && git checkout 3f8af15a76ac8675812e856da45454bafc90f12c
-git apply ../patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch      # path when cloned inside the Babelfish-SimulMT repository
+git apply ../patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch      # path when cloned inside the Babelfish-SimulST repository
 cmake -B build -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release && cmake --build build -j --target llama-server && cd ..
 # start llama-server and the web / API service (same APIs as the vLLM version)
-bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-GGUF --quant Q4_K_M --llama-server llama.cpp/build/bin/llama-server
+bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B-GGUF --quant Q4_K_M --llama-server llama.cpp/build/bin/llama-server
 ```
 
 Greedy decoding with the repetition guard is the default. Beam search also works on llama.cpp (`--beams 2`), but it was not better than greedy there and doubles the step time, so it is not the default. llama.cpp does not batch the audio prefill of several sessions, so on an A800 a step with a 24 s window takes about 0.5 s (more than the 0.32 s cadence): real-time sessions on long audio merge blocks and fall behind, which makes this version a better fit for offline jobs, short utterances and environments without vLLM. Details: [deployment guide · llama.cpp](docs/DEPLOYMENT.md#7-llamacpp-gguf-version).
@@ -269,7 +269,7 @@ If Babelfish helps your work, please cite:
   title  = {Babelfish: Low-Latency Streaming Simultaneous Speech Translation between English and Chinese},
   author = {Shiyang Deng and Nanjie Li and Xiaoyong Guo and Haihua Xu and Wei Shi and Hao Huang and Xiansu Deng and Jun Guo and Yuanming Luo and Wangzheng Wu},
   year   = {2026},
-  url    = {https://github.com/timekettle/Babelfish-SimulMT}
+  url    = {https://github.com/timekettle/Babelfish-SimulST}
 }
 ```
 

@@ -4,7 +4,7 @@
 # build llama-server with the audio patch in patches/llama.cpp (see docs/DEPLOYMENT.md).
 #
 #   bash scripts/deploy_llamacpp.sh --model /path/to/Babelfish-30B-A3B-GGUF --quant Q4_K_M --llama-server /path/to/llama-server
-#   bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-GGUF --quant Q8_0 --gpus 0 --beams 2
+#   bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B-GGUF --quant Q8_0 --gpus 0 --beams 2
 #
 # Options: --model DIR|ID  --quant Q8_0|Q4_K_M  --source hf|modelscope  --llama-server PATH  --python PY  --gpus LIST
 #          --sessions N (concurrent sessions, default 4)  --beams N (default 1 = greedy)  --ngl N (layers on the GPU)

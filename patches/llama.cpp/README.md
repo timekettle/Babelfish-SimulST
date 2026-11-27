@@ -16,7 +16,7 @@ the GGUF model matches vLLM (see docs/DEPLOYMENT.md, section 7).
 ```bash
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
 git checkout 3f8af15a76ac8675812e856da45454bafc90f12c
-git apply /path/to/Babelfish-SimulMT/patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch
+git apply /path/to/Babelfish-SimulST/patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch
 cmake -B build -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j --target llama-server
 ```

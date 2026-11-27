@@ -6,8 +6,8 @@
 
 <div align="center">
 
-[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Babelfish-ffc107)](https://huggingface.co/timekettle/Babelfish-SimulMT)
-[![GitHub](https://img.shields.io/badge/GitHub-Babelfish-181717?logo=github)](https://github.com/timekettle/Babelfish-SimulMT)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Babelfish-ffc107)](https://huggingface.co/timekettle/Babelfish-SimulST)
+[![GitHub](https://img.shields.io/badge/GitHub-Babelfish-181717?logo=github)](https://github.com/timekettle/Babelfish-SimulST)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 
 </div>
@@ -135,9 +135,9 @@ COMET 和 CometKiwi 为百分制（0–100）；每个指标每列最好的值�
 
 | 模型名 | 简介 | 推理框架 | 下载 |
 |---|---|---|---|
-| Babelfish-30B-A3B | FP16 原版 | vLLM | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulMT/tree/main/Babelfish-30B-A3B) |
-| Babelfish-30B-A3B-FP8 | FP8 量化（逐 128×128 块缩放） | vLLM | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulMT/tree/main/Babelfish-30B-A3B-FP8) |
-| Babelfish-30B-A3B-GGUF | Q8_0 / Q4_K_M + 音频编码器 | llama.cpp | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulMT/tree/main/Babelfish-30B-A3B-GGUF) |
+| Babelfish-30B-A3B | FP16 原版 | vLLM | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulST/tree/main/Babelfish-30B-A3B) |
+| Babelfish-30B-A3B-FP8 | FP8 量化（逐 128×128 块缩放） | vLLM | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulST/tree/main/Babelfish-30B-A3B-FP8) |
+| Babelfish-30B-A3B-GGUF | Q8_0 / Q4_K_M + 音频编码器 | llama.cpp | [Hugging Face](https://huggingface.co/timekettle/Babelfish-SimulST/tree/main/Babelfish-30B-A3B-GGUF) |
 
 | 版本 | 权重大小 | 显存 | 质量 | 适合 |
 |---|---|---|---|---|
@@ -160,8 +160,8 @@ COMET 和 CometKiwi 为百分制（0–100）；每个指标每列最好的值�
 先创建并激活 conda 环境，再安装依赖：
 
 ```bash
-git clone https://github.com/timekettle/Babelfish-SimulMT.git
-cd Babelfish-SimulMT
+git clone https://github.com/timekettle/Babelfish-SimulST.git
+cd Babelfish-SimulST
 
 conda create -n babelfish python=3.12 -y
 conda activate babelfish
@@ -180,9 +180,9 @@ pip install -e .
 
 ```bash
 # 从 Hugging Face 下载并启动（FP16 原版）
-bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B
+bash scripts/deploy.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B
 # FP8 版
-bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8
+bash scripts/deploy.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B-FP8
 # 本地权重，指定单卡或两卡张量并行
 bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0
 bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0,1
@@ -191,7 +191,7 @@ bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0,1
 也可以给脚本加 `--install`，自动创建并配置名为 `babelfish` 的 conda 环境（驱动只到 CUDA 12.x 时加 `--cu129`）：
 
 ```bash
-bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B
 ```
 
 或不用脚本，在 `babelfish` conda 环境里直接启动服务：
@@ -227,10 +227,10 @@ GGUF 版用 llama.cpp 运行（Q8_0 30.3 GiB / Q4_K_M 17.3 GiB，外加 1.2 GiB 
 ```bash
 # 编译打过补丁的 llama.cpp
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp && git checkout 3f8af15a76ac8675812e856da45454bafc90f12c
-git apply ../patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch      # 在 Babelfish-SimulMT 仓库目录下 clone 时的相对路径
+git apply ../patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch      # 在 Babelfish-SimulST 仓库目录下 clone 时的相对路径
 cmake -B build -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release && cmake --build build -j --target llama-server && cd ..
 # 一键启动 llama-server 和网页 / 接口服务（接口与 vLLM 版相同）
-bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-GGUF --quant Q4_K_M --llama-server llama.cpp/build/bin/llama-server
+bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B-GGUF --quant Q4_K_M --llama-server llama.cpp/build/bin/llama-server
 ```
 
 默认贪心解码 + 复读保护。llama.cpp 上也能用束搜索（`--beams 2`），但实测质量没有比贪心更好、每步耗时翻倍，所以不作为默认。llama.cpp 不会把多路音频的预填拼成一批，A800 上 24 s 窗口每步约 0.5 s（超过 0.32 s 的节拍），长音频的实时会话会合并音频块、延迟变大，更适合离线转写、短句或没有 vLLM 的环境。详见[部署教程 · llama.cpp](docs/DEPLOYMENT_zh.md#7-llamacppgguf-版)。
@@ -269,7 +269,7 @@ python -m simulst.eval.score_sentences outputs/fleurs
   title  = {Babelfish: Low-Latency Streaming Simultaneous Speech Translation between English and Chinese},
   author = {Shiyang Deng and Nanjie Li and Xiaoyong Guo and Haihua Xu and Wei Shi and Hao Huang and Xiansu Deng and Jun Guo and Yuanming Luo and Wangzheng Wu},
   year   = {2026},
-  url    = {https://github.com/timekettle/Babelfish-SimulMT}
+  url    = {https://github.com/timekettle/Babelfish-SimulST}
 }
 ```
 

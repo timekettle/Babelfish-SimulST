@@ -63,7 +63,7 @@ pip install "vllm==0.28.0+cu129" "torch==2.13.0+cu129" \
   --extra-index-url https://wheels.vllm.ai/0.28.0/cu129
 
 # 本项目（服务、客户端、离线推理）
-git clone https://github.com/timekettle/Babelfish-SimulMT.git && cd Babelfish-SimulMT
+git clone https://github.com/timekettle/Babelfish-SimulST.git && cd Babelfish-SimulST
 pip install -e .
 ```
 
@@ -73,7 +73,7 @@ pip install -e .
 
 ```bash
 # Hugging Face（仅下载 FP16 子目录到 models/Babelfish-30B-A3B）
-hf download timekettle/Babelfish-SimulMT --include "Babelfish-30B-A3B/*" --local-dir models
+hf download timekettle/Babelfish-SimulST --include "Babelfish-30B-A3B/*" --local-dir models
 ```
 
 FP8 版把名字换成 `Babelfish-30B-A3B-FP8`。GGUF 版见第 7 节。
@@ -91,9 +91,9 @@ bash scripts/deploy.sh --model models/Babelfish-30B-A3B --gpus 0
 bash scripts/deploy.sh --model models/Babelfish-30B-A3B --gpus 0,1                                # 两卡张量并行
 
 # 也可加 --install 自动创建名为 babelfish 的 conda 环境并安装依赖
-bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B           # 驱动支持 CUDA 13
-bash scripts/deploy.sh --install --cu129 --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B   # 驱动只到 CUDA 12.x
-bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8       # FP8 版
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B           # 驱动支持 CUDA 13
+bash scripts/deploy.sh --install --cu129 --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B   # 驱动只到 CUDA 12.x
+bash scripts/deploy.sh --install --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B-FP8       # FP8 版
 bash scripts/deploy.sh --model models/Babelfish-30B-A3B --dry-run                                 # 只打印将执行的命令
 ```
 
@@ -318,7 +318,7 @@ llama.cpp 处理 Qwen3-Omni 音频时，会把最后不满 1 秒的音频补零�
 ```bash
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
 git checkout 3f8af15a76ac8675812e856da45454bafc90f12c        # 补丁基于这个提交（2026-11-02）
-git apply /path/to/Babelfish-SimulMT/patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch
+git apply /path/to/Babelfish-SimulST/patches/llama.cpp/qwen3-omni-audio-valid-tokens.patch
 cmake -B build -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j --target llama-server
 ```
@@ -332,7 +332,7 @@ cmake --build build -j --target llama-server
 一键脚本（先启动 llama-server，就绪后启动网页 / 接口服务；Ctrl+C 一起停止）：
 
 ```bash
-bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-GGUF --quant Q4_K_M \
+bash scripts/deploy_llamacpp.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B-GGUF --quant Q4_K_M \
   --llama-server /path/to/llama.cpp/build/bin/llama-server --gpus 0 [--sessions 4] [--beams 1]
 ```
 

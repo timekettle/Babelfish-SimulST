@@ -2,9 +2,9 @@
 # One-command deployment of the vLLM server: (optionally) create/use a conda environment, fetch the model,
 # and start the web / API service in the foreground (Ctrl+C stops it).
 #
-#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B --install          # conda env + HF
-#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B --install --cu129  # CUDA 12.x driver
-#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulMT/Babelfish-30B-A3B-FP8 --install      # FP8 subfolder
+#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B --install          # conda env + HF
+#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B --install --cu129  # CUDA 12.x driver
+#   bash scripts/deploy.sh --model timekettle/Babelfish-SimulST/Babelfish-30B-A3B-FP8 --install      # FP8 subfolder
 #   bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0                               # active conda env
 #   bash scripts/deploy.sh --model /path/to/Babelfish-30B-A3B --gpus 0,1                             # 2-GPU tensor parallel
 #
